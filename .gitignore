@@ -23,9 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-#keys
+# Keys
+aws.sh
 .env
 *.pem
 
-#deploy script
-deploy.sh
+# Database files
+*.db

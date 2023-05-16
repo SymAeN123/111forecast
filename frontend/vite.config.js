@@ -6,7 +6,7 @@ import { resolve } from 'path'
 export default defineConfig({
     plugins: [react()],
     build: {
-        outDir: '../static',
+        outDir: '../backend/public_backend/public/',
         rollupOptions: {
             output: {
                 entryFileNames: `assets/[name].js`,

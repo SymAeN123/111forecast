@@ -1,0 +1,1 @@
+import{c as e,j as t,R as r}from"./index.js";function n(){return t.jsx("div",{children:"Can this Work?"})}e.createRoot(document.getElementById("root")).render(t.jsx(r.StrictMode,{children:t.jsx(n,{})}));
