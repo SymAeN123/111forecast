@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 root = Path.cwd().parents[1]
 sys.path.append(str(root))
-import config
+from config import PUBLIC_PORT
 
 #Server imports
 from flask import Flask, jsonify, request, Response, send_file
@@ -27,5 +27,5 @@ def send_current_page():
     return send_file("./public/submit/index.html")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-    #serve(app, host='0.0.0.0', port=8080, threads=1)
+    app.run(host="0.0.0.0", port=PUBLIC_PORT)
+    #serve(app, host='0.0.0.0', port=PUBLIC_PORT, threads=1)
