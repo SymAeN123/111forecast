@@ -30,6 +30,3 @@ aws.sh
 
 # Database files
 *.db
-
-#Edited cfg
-config.py
