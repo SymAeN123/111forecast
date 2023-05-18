@@ -23,8 +23,45 @@ def send_home_page():
 
 
 @app.route("/submit", methods=["GET"])
-def send_current_page():
+def send_submit_page():
     return send_file("./public/submit/index.html")
+
+@app.route("/validatekey", methods=["GET"])
+def get_key_user():
+    input = request.json
+    print(input)
+    #send request
+
+    #return r.json()
+    return "returning json"
+
+@app.route("/submitforecast", methods=["POST"])
+def send_forecast_to_db():
+    #Validate input
+    input = request.json
+    print(input)
+
+    #Formulate JSON
+
+    #Send the post request to db API
+
+    #Get request status
+
+    #Return success or failure
+    return jsonify(
+        {
+            "text": "got the post"
+        }
+    )
+
+@app.route("/getforecastdate", methods=["GET"])
+def get_next_forecast_date():
+    #Send get request to db API
+
+    #Create UTC Date Dict
+
+    return "dict with utc date or valid=false"
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PUBLIC_PORT)
