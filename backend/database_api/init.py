@@ -7,7 +7,7 @@ con.execute(
     """
     CREATE TABLE contests(
         contest INTEGER NOT NULL PRIMARY KEY,
-        current INTEGER NOT NULL
+        status INTEGER NOT NULL
     )
     """
 )

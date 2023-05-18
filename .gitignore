@@ -30,4 +30,7 @@ aws.sh
 *.pem
 
 # Database files
+contests/
 *.db
+*.ipynb
+*.pkl
