@@ -49,6 +49,81 @@ class Contest:
         con.commit()
         con.close()
 
+    def add_fcst_date(self, date, abroad_station, home_station="KEDU"):
+        with open(str(self.dir) + "/fcst_dates.pkl", "rb") as file:
+            fcst_dates = pickle.load(file)
+
+        fcst_dates.append((date, home_station, abroad_station))
+        fcst_dates = sorted(fcst_dates, key=lambda x: x[0])
+
+        with open(str(self.dir) + "/fcst_dates.pkl", "wb") as file:
+            pickle.dump(fcst_dates, file)
+
+    def store_verification(self, ver_dict):
+        con = sqlite3.connect(str(self.dir) + "/contest.db")
+        cur = con.cursor()
+
+        cur.execute(
+            """
+                INSERT INTO verifications 
+                (
+                    date_utc, davis_max_temp, davis_min_temp, davis_wind_bool, davis_rain_category,
+                    abroad_station, abroad_max_temp, abroad_min_temp, abroad_wind_bool, abroad_rain_category
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, 
+            (
+                ver_dict["date_utc"], ver_dict["davis_max_temp"], ver_dict["davis_min_temp"],
+                ver_dict["davis_wind_bool"], ver_dict["davis_rain_category"],
+                ver_dict["abroad_station"], ver_dict["abroad_max_temp"], ver_dict["abroad_min_temp"],
+                ver_dict["abroad_wind_bool"], ver_dict["abroad_rain_category"]
+            )
+        )
+
+        con.commit()
+        con.close()
+
+    def create_forecaster_table(self, key: int, email:str, name: str):
+        con = sqlite3.connect(str(self.dir) + "/contest.db")
+        cur = con.cursor()
+
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", ("f"+str(key),))
+        result = cur.fetchone()
+        if not (result is None):
+            print("Forecaster already exists!")
+            con.close()
+            return
+
+        cur = con.cursor()
+        cur.execute(
+            """
+                INSERT INTO forecasters 
+                (key, email, name) VALUES (?, ?, ?)
+            """, 
+            (key, email, name)
+        )
+        cur.execute(
+            f"""
+                CREATE TABLE {"f"+str(key)}(
+                date_utc TEXT NOT NULL PRIMARY KEY,
+                davis_max_temp INTEGER NOT NULL,
+                davis_min_temp INTEGER NOT NULL,
+                davis_wind_bool INTEGER NOT NULL,
+                davis_rain_category INTEGER NOT NULL,
+                abroad_station TEXT NOT NULL,
+                abroad_max_temp INTEGER NOT NULL,
+                abroad_min_temp INTEGER NOT NULL,
+                abroad_wind_bool INTEGER NOT NULL,
+                abroad_rain_category INTEGER NOT NULL,
+                )
+            """
+        )
+
+        con.commit()
+        con.close()
+
+    def insert_forecast():
+
+
 class Contests:
     def __init__(self, filename: str):
         self.filename = filename
@@ -59,23 +134,25 @@ class Contests:
         cur = con.cursor()
 
         # Get the highest contest number in the table
-        cur.execute(f"SELECT MAX(contest) FROM contests")
+        cur.execute("SELECT MAX(contest) FROM contests")
         max_contest = cur.fetchone()[0]
 
         # Insert a new row at the end of the table with the next contest number
         new_contest = max_contest + 1 if max_contest is not None else 1
-        cur.execute(f"INSERT INTO contests (contest, status) VALUES (?, ?)", (new_contest, status_value))
+        cur.execute("INSERT INTO contests (contest, status) VALUES (?, ?)", (new_contest, status_value))
         con.commit()
         con.close()
 
         # Create a new folder for the contest
         (self.contests_dir / str(new_contest)).mkdir()
+        contest = Contest(new_contest)
+        contest.initialize_dir()
 
     def delete_contest_by_id(self, contest):
         con = sqlite3.connect(self.filename)
         cur = con.cursor()
 
-        cur.execute(f"SELECT MAX(contest) FROM contests")
+        cur.execute("SELECT MAX(contest) FROM contests")
         max_contest = cur.fetchone()[0]
         if contest <= 0 or contest > max_contest or max_contest is None:
             print("Either requested context out of range or empty table")
@@ -83,17 +160,17 @@ class Contests:
             return
 
         # Delete the row from the table
-        cur.execute(f"DELETE FROM contests WHERE contest = ?", (contest,))
+        cur.execute("DELETE FROM contests WHERE contest = ?", (contest,))
         con.commit()
 
         # Remove the folder for the contest
         shutil.rmtree(self.contests_dir / str(contest))
 
         # Rename all rows with a higher contest number
-        cur.execute(f"SELECT contest FROM contests WHERE contest > ?", (contest,))
+        cur.execute("SELECT contest FROM contests WHERE contest > ?", (contest,))
         rows = cur.fetchall()
         for row in rows:
-            cur.execute(f"UPDATE contests SET contest = ? WHERE contest = ?", (row[0]-1, row[0]))
+            cur.execute("UPDATE contests SET contest = ? WHERE contest = ?", (row[0]-1, row[0]))
             (self.contests_dir / str(row[0])).rename(self.contests_dir / str(row[0]-1))
         con.commit()
         con.close
@@ -130,7 +207,7 @@ class Contests:
         con = sqlite3.connect(self.filename)
         cur = con.cursor()
 
-        cur.execute(f"SELECT MAX(contest) FROM contests")
+        cur.execute("SELECT MAX(contest) FROM contests")
         max_contest = cur.fetchone()[0]
 
         if max_contest is None:
