@@ -10,11 +10,6 @@ from flask import Flask, jsonify, request, Response, send_file
 from waitress import serve
 import requests
 
-#Environment Variables
-from dotenv import load_dotenv
-load_dotenv()
-MESOWEST_API_KEY = os.getenv('MESOWEST_API_KEY')
-
 app = Flask(__name__, static_url_path="", static_folder="./public")
 
 @app.route("/", methods=["GET"])

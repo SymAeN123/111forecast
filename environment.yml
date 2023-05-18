@@ -11,3 +11,4 @@ dependencies:
         - python-dotenv==0.21.0
         - Flask==2.3.2
         - waitress==2.1.2
+        - datetime==5.1

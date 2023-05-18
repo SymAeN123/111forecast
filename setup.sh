@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ROOT_DIR=$(pwd)
+
 if ! command -v conda &> /dev/null
 then
     echo "Anaconda/Miniconda is not installed!"
@@ -21,3 +23,9 @@ else
     echo "Creating conda env 111forecast"
     conda env create -f environment.yml
 fi
+
+echo "Initializing database:"
+cd "${ROOT_DIR}/backend/database_api/"
+mkdir contests
+conda run --live-stream -n 111forecast python init.py
+cd $ROOT_DIR
